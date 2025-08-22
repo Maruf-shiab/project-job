@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useContext, useRef } from 'react';
 import { assets } from '../assets/assets';
+import { AppContext } from '../context/AppContext';
 
 const Hero = () => {
+  const { setSearchFilter, setIsSearched, searchFilter, isSearched } = useContext(AppContext);
+  const titleRef = useRef(null);
+  const locationRef = useRef(null);
+
+  const onSearch = () => {
+    setSearchFilter({
+      title: titleRef.current.value,
+      location: locationRef.current.value
+    })
+    setIsSearched(true)
+        
+  }
+
   return (
     <div className="container 2xl:px-20 mx-auto my-10">
       <div className="bg-gradient-to-r from-purple-600 via-blue-500 to-blue-400 text-white p-10 rounded-2xl shadow-2xl py-16 text-center mx-2 lg:mx-0">
@@ -18,6 +32,7 @@ const Hero = () => {
               type="text"
               placeholder="Search for jobs"
               className="text-sm p-2 rounded-full outline-none w-full bg-gray-100"
+              ref={titleRef}
             />
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -26,12 +41,27 @@ const Hero = () => {
               type="text"
               placeholder="Location"
               className="text-sm p-2 rounded-full outline-none w-full bg-gray-100"
+              ref={locationRef}
             />
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 transition px-8 py-2 rounded-full text-white font-semibold shadow-md">
+          <button
+            onClick={onSearch}
+            className="bg-blue-600 hover:bg-blue-700 transition px-8 py-2 rounded-full text-white font-semibold shadow-md"
+          >
             Search
           </button>
         </div>
+        {/* Show searched values below the search bar */}
+        {isSearched && (
+          <div className="mt-6 text-white">
+            <div>
+              <strong>Searched Title:</strong> {searchFilter.title}
+            </div>
+            <div>
+              <strong>Searched Location:</strong> {searchFilter.location}
+            </div>
+          </div>
+        )}
       </div>
       <div className="border border-gray-200 shadow-md mx-2 mt-8 p-6 rounded-xl flex justify-center bg-white">
         <div className="flex items-center gap-10 lg:gap-16 flex-wrap justify-center">
