@@ -1,10 +1,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
-<<<<<<< HEAD
 import { JobCategories, JobLocations, jobsData } from '../assets/assets';
 import JobCard from './JobCard';
-=======
->>>>>>> e717550b4a1592c1594bce8e10b98a26c40b3d7a
 
 const JobListing = () => {
     const { isSearched, searchFilter, setSearchFilter } = useContext(AppContext);
@@ -43,17 +40,15 @@ const JobListing = () => {
                         </div>
                     </>
                 )}
-<<<<<<< HEAD
                 {/* Additional Category Filters */}
                 <div className='max-lg:hidden'>
                     <h4 className='font-medium text-lg py-4'>Search by Categories</h4>
                     <ul className='space-y-4 text-gray-600'>
                         {
-                            JobCategories.map((category, index)=>(
+                            JobCategories.map((category, index) => (
                                 <li className='flex gap-3 items-center' key={index}>
                                     <input className='scale-125' type="checkbox" name="" id="" />
                                     {category}
-
                                 </li>
                             ))
                         }
@@ -64,11 +59,10 @@ const JobListing = () => {
                     <h4 className='font-medium text-lg py-4 pt-14'>Search by Locations</h4>
                     <ul className='space-y-4 text-gray-600'>
                         {
-                            JobLocations.map((location, index)=>(
+                            JobLocations.map((location, index) => (
                                 <li className='flex gap-3 items-center' key={index}>
                                     <input className='scale-125' type="checkbox" name="" id="" />
                                     {location}
-
                                 </li>
                             ))
                         }
@@ -77,17 +71,14 @@ const JobListing = () => {
             </div>
             {/*job listings section*/}
             <section className="w-full lg:w-3/4 text-gray-800 max-lg:px-4 ">
-                <h3 className='font-medium text-3xl py-2 'id ='job-list'>Latest Jobs</h3>
+                <h3 className='font-medium text-3xl py-2 ' id='job-list'>Latest Jobs</h3>
                 <p className='mb-8'>Ready for a career glow-up? ✨</p>
                 <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
-                  {jobsData.map((job,index) => (
-                   <JobCard key={index} job={job} />
-                  ))}  
+                    {jobsData.map((job, index) => (
+                        <JobCard key={index} job={job} />
+                    ))}
                 </div>
             </section>
-=======
-            </div>
->>>>>>> e717550b4a1592c1594bce8e10b98a26c40b3d7a
         </div>
     );
 };
