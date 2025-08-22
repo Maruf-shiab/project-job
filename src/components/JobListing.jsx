@@ -1,13 +1,10 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
-<<<<<<< HEAD
-import { JobCategories, JobLocations, jobsData } from '../assets/assets';
+import { JobCategories, JobLocations } from '../assets/assets';
 import JobCard from './JobCard';
-=======
->>>>>>> e717550b4a1592c1594bce8e10b98a26c40b3d7a
 
 const JobListing = () => {
-    const { isSearched, searchFilter, setSearchFilter } = useContext(AppContext);
+    const { isSearched, searchFilter, setSearchFilter ,jobs } = useContext(AppContext);
 
     // Simple X icon as SVG
     const CloseIcon = ({ onClick }) => (
@@ -43,7 +40,6 @@ const JobListing = () => {
                         </div>
                     </>
                 )}
-<<<<<<< HEAD
                 {/* Additional Category Filters */}
                 <div className='max-lg:hidden'>
                     <h4 className='font-medium text-lg py-4'>Search by Categories</h4>
@@ -80,14 +76,11 @@ const JobListing = () => {
                 <h3 className='font-medium text-3xl py-2 'id ='job-list'>Latest Jobs</h3>
                 <p className='mb-8'>Ready for a career glow-up? ✨</p>
                 <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
-                  {jobsData.map((job,index) => (
+                  {jobs.map((job,index) => (
                    <JobCard key={index} job={job} />
                   ))}  
                 </div>
             </section>
-=======
-            </div>
->>>>>>> e717550b4a1592c1594bce8e10b98a26c40b3d7a
         </div>
     );
 };
