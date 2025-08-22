@@ -1,7 +1,10 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+<<<<<<< HEAD
 import { JobCategories, JobLocations, jobsData } from '../assets/assets';
 import JobCard from './JobCard';
+=======
+>>>>>>> e717550b4a1592c1594bce8e10b98a26c40b3d7a
 
 const JobListing = () => {
     const { isSearched, searchFilter, setSearchFilter } = useContext(AppContext);
@@ -40,6 +43,7 @@ const JobListing = () => {
                         </div>
                     </>
                 )}
+<<<<<<< HEAD
                 {/* Additional Category Filters */}
                 <div className='max-lg:hidden'>
                     <h4 className='font-medium text-lg py-4'>Search by Categories</h4>
@@ -81,6 +85,9 @@ const JobListing = () => {
                   ))}  
                 </div>
             </section>
+=======
+            </div>
+>>>>>>> e717550b4a1592c1594bce8e10b98a26c40b3d7a
         </div>
     );
 };
