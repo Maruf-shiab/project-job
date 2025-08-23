@@ -1,10 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { JobCategories, JobLocations } from '../assets/assets';
 import JobCard from './JobCard';
 
 const JobListing = () => {
     const { isSearched, searchFilter, setSearchFilter ,jobs } = useContext(AppContext);
+
+    const[showFilter,setShowFilter] = useState(false);
 
     // Simple X icon as SVG
     const CloseIcon = ({ onClick }) => (
@@ -40,8 +42,13 @@ const JobListing = () => {
                         </div>
                     </>
                 )}
+
+                <button onClick={e => setShowFilter(prev => !prev)} className='px-6 py-1.5 rounded border border-gray-400 lg:hidden'>
+                    {showFilter ? "Close" : "Filters"}
+                </button>
+
                 {/* Additional Category Filters */}
-                <div className='max-lg:hidden'>
+                <div className={showFilter ? "" : "max-lg:hidden"}>
                     <h4 className='font-medium text-lg py-4'>Search by Categories</h4>
                     <ul className='space-y-4 text-gray-600'>
                         {
@@ -55,8 +62,9 @@ const JobListing = () => {
                         }
                     </ul>
                 </div>
+
                 {/* Location Category Filters */}
-                <div className='max-lg:hidden'>
+                <div className={showFilter ? "" : "max-lg:hidden"}>
                     <h4 className='font-medium text-lg py-4 pt-14'>Search by Locations</h4>
                     <ul className='space-y-4 text-gray-600'>
                         {
