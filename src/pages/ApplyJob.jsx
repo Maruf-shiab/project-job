@@ -6,11 +6,11 @@ import Loading from "../components/Loading";
 import Navbar from '../components/Navbar';
 import kConvert from 'k-convert';
 import moment from 'moment';
-
+import JobCard from '../components/JobCard'; // Assuming you have this component
+import Footer from '../components/Footer';
 
 function ApplyJob() {
   const { id } = useParams();
-
   const [JobData, setJobData] = useState(null);
   const { jobs } = useContext(AppContext);
 
@@ -18,7 +18,6 @@ function ApplyJob() {
     const data = jobs.filter(job => job._id === id);
     if (data.length !== 0) {
       setJobData(data[0]);
-      console.log(data[0]);
     }
   };
 
@@ -27,6 +26,7 @@ function ApplyJob() {
       fetchJob();
     }
   }, [id, jobs]);
+
   return JobData ? (
     <>
       <Navbar />
@@ -69,21 +69,24 @@ function ApplyJob() {
           <div className='flex flex-col lg:flex-row justify-between items-start'>
             <div className=' w-full lg:w-2/3'>
               <h2 className='font-bold text-2xl mb-4 text-purple-950'>Job Description</h2>
-              <div className='rich-text' dangerouslySetInnerHTML={{__html:JobData.description}}></div>
-                <button className='bg-blue-600 p-2,5 px-10 text-white rounded mt-10'>
+              <div className='rich-text' dangerouslySetInnerHTML={{ __html: JobData.description }}></div>
+              <button className='bg-blue-600 p-2,5 px-10 text-white rounded mt-10'>
                 Apply Now
               </button>
-
-              
             </div>
+            <div className='w-full lg:w-1/3 mt-8 lg:mt-0 lg:ml-8 space-y-5'>
+              <h2>More jobs from {JobData.companyId.name}</h2>
+              {jobs.filter(job => job._id !== JobData._id && job.companyId._id === JobData.companyId._id)
+                .slice(0, 4).map((job, index) => <JobCard key={index} job={job} />)}
             </div>
+          </div>
         </div>
       </div>
+      <Footer/>
     </>
   ) : (
     <Loading />
   );
-
 }
 
-export default ApplyJob
+export default ApplyJob;
