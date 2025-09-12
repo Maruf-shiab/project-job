@@ -2,6 +2,8 @@ import Company from "../models/Company.js";
 import bcrypt from 'bcrypt'
 import {v2 as cloudinary} from 'cloudinary'
 import generateToken from "../utils/generateToken.js";
+import Job from "../models/Job.js";
+
 
 
 //Register A new Company
@@ -47,6 +49,28 @@ export const registerCompany =async (req, res) => {
 }
 //company login
  export const loginCompany =async (req, res) => {
+    const {email,password} =req.body
+    try {
+        const company =await Company.findOne({email})
+        if(bcrypt.compare(password,company.password)){
+          res.json({
+            success:true,
+            company:{
+                _id : company._id,
+            name: company.name,
+            email : company.email,
+            image :company.image
+
+            },
+            token:generateToken(company._id)
+          })
+        }
+        else{
+            res.json({success:false,message:"Invalid Email Or Password"})
+        }
+    } catch (error) {
+        res.json({success:false,mesage:error.message})
+    }
 
 }
 //GET Comapny Data
@@ -55,6 +79,25 @@ export const registerCompany =async (req, res) => {
     }
 //post a new job
     export const postJob =async (req, res) => {
+        const{ title,description,location,salary,level,catergory } = req.body
+
+    const companyId =req.company._id
+    try {
+       const newJob= new Job({
+        title,
+        description,
+        location,
+        salary,
+        companyId,
+        date: Date.now(),
+        level,
+        catergory
+       })
+       await newJob.save()
+       res.json({success:true,newJob})
+    } catch (error) {
+        res.json({success:false, message: error.message})
+    }
 
     }
 //get company job Applicants
