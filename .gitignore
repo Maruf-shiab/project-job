@@ -1,1 +1,35 @@
-node_modules
+# Build directories
+dist/
+dist-ssr/
+
+# Local environment files
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# macOS files
+.DS_Store
+
+# Windows files
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Node modules
+node_modules/
+
+# Temporary files
+*.log
+*.tmp
+
+# Other files to ignore
+*.bak
+*.swp
+
+# Ignore sensitive data files
+.env
