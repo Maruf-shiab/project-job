@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Route,Routes,Navigate } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import ApplyJob from './pages/ApplyJob.jsx'
 import Applications from './pages/Applications.jsx'
@@ -15,25 +15,28 @@ import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
 
-  const {showRecruiterLogin} = useContext(AppContext)
+  const { showRecruiterLogin, companyToken } = useContext(AppContext)
 
   return (
     <div>
       {showRecruiterLogin && <RecruiterLogin />}
-      <ToastContainer/>
+      <ToastContainer />
       <Routes>
-        <Route  path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/apply-job/:id" element={<ApplyJob />} />
         <Route path="/applications" element={<Applications />} />
-        <Route path='/dashboard' element={<Dashboard/>}>
-  {/* default child route when visiting /dashboard */}
-  <Route index element={<Navigate to="add-job" replace />} />
-  <Route path='add-job' element={<AddJob />} />
-  <Route path='manage-jobs' element={<ManageJobs/>}/>
-  <Route path='view-applications' element={<ViewApplications/>} />
-</Route>
+        <Route path='/dashboard' element={<Dashboard />}>
+          {/* default child route when visiting /dashboard */}
 
+          {companyToken ? <>
+            <Route index element={<Navigate to="add-job" replace />} />
+            <Route path='add-job' element={<AddJob />} />
+            <Route path='manage-jobs' element={<ManageJobs />} />
+            <Route path='view-applications' element={<ViewApplications />} />
+          </> : null
+          }
 
+        </Route>
       </Routes>
     </div>
   )
