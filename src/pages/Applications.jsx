@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { assets, jobsApplied } from '../assets/assets';
 import moment from 'moment';
@@ -9,12 +9,14 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const Applications = () => {
-   const { userApplications } = useContext(AppContext);
+  // read from context
+  const { userApplications } = useContext(AppContext);
+  const { backendUrl, userData, fetchUserData, fetchUserApllications } = useContext(AppContext);
   const { user } = useUser();
   const { getToken } = useAuth();
+
   const [isEdit, setIsEdit] = useState(false);
   const [resume, setResume] = useState(null);
-  const { backendUrl, userData, fetchUserData } = useContext(AppContext);
 
   const updateResume = async () => {
     try {
@@ -47,6 +49,16 @@ const Applications = () => {
   };
 
   const canEdit = isEdit || (!!userData && !userData.resume);
+
+  useEffect(() => {
+    if (user) {
+      // ✅ use the exact function name from your context
+      fetchUserApllications();
+    }
+  }, [user]); // keep minimal deps per your style
+
+  // ✅ never crash if userApplications is undefined
+  const list = Array.isArray(userApplications) ? userApplications : [];
 
   return (
     <>
@@ -108,39 +120,53 @@ const Applications = () => {
             <tr>
               <th className="px-4 py-3 border-b text-left">Company</th>
               <th className="px-4 py-3 border-b text-left">Job Title</th>
-              <th className="px-4 py-3 border-b text-left mx-sm:hidden">Location</th>
-              <th className="px-4 py-3 border-b text-left mx-sm:hidden">Date</th>
+              <th className="px-4 py-3 border-b text-left max-sm:hidden">Location</th>
+              <th className="px-4 py-3 border-b text-left max-sm:hidden">Date</th>
               <th className="px-4 py-3 border-b text-left">Status</th>
             </tr>
           </thead>
           <tbody>
-            {userApplications.map((job, index) => (
-              <tr key={job._id || index}>
-                <td className="py-3 px-4 flex items-center gap-2 border-b">
-                  <img className="w-8 h-8" src={job.companyId.image} alt="" />
-                  {job.companyId.name}
-                </td>
-                <td className="py-2 px-4 border-b">{job.jobId.title}</td>
-                {/* Correct order: Location then Date */}
-                <td className="py-2 px-4 border-b mx-sm:hidden">{job.jobId.location}</td>
-                <td className="py-2 px-4 border-b mx-sm:hidden">
-                  {job.date ? moment(job.date).format('ll') : '—'}
-                </td>
-                <td className="py-2 px-4 border-b">
-                  <span
-                    className={`${
-                      job.status === 'Accepted'
-                        ? 'bg-green-100'
-                        : job.status === 'Rejected'
-                        ? 'bg-red-100'
-                        : 'bg-blue-100'
-                    } px-4 py-1.5 rounded`}
-                  >
-                    {job.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {list.map((job, index) => {
+              // ✅ handle both shapes: populated objects OR plain IDs
+              const companyDoc =
+                job?.companyId && typeof job.companyId === 'object' ? job.companyId : null;
+              const jobDoc =
+                job?.jobId && typeof job.jobId === 'object' ? job.jobId : null;
+
+              const companyName = companyDoc?.name || 'Company';
+              const companyImage = companyDoc?.image || '';
+              const title = jobDoc?.title || 'Untitled Job';
+              const location = jobDoc?.location || '—';
+              const appliedDate = job?.date || job?.createdAt;
+              const status = job?.status || 'submitted';
+
+              return (
+                <tr key={job._id || index}>
+                  <td className="py-3 px-4 flex items-center gap-2 border-b">
+                    {companyImage ? <img className="w-8 h-8" src={companyImage} alt="" /> : null}
+                    {companyName}
+                  </td>
+                  <td className="py-2 px-4 border-b">{title}</td>
+                  <td className="py-2 px-4 border-b max-sm:hidden">{location}</td>
+                  <td className="py-2 px-4 border-b max-sm:hidden">
+                    {appliedDate ? moment(appliedDate).format('ll') : '—'}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <span
+                      className={`${
+                        status === 'Accepted'
+                          ? 'bg-green-100'
+                          : status === 'Rejected'
+                          ? 'bg-red-100'
+                          : 'bg-blue-100'
+                      } px-4 py-1.5 rounded`}
+                    >
+                      {status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
