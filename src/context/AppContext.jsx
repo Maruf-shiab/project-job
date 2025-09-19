@@ -109,7 +109,10 @@ export const AppContextProvider = (props) => {
         setShowRecruiterLogin,
         companyToken,setCompanyToken,
         companyData,setCompanyData,
-        backendUrl
+        backendUrl,
+        userData,setUserData,
+        userApplications,setUserApplications,
+        fetchUserData
     };
 
     return (
