@@ -110,7 +110,17 @@ export const registerCompany =async (req, res) => {
     }
 //get company job Applicants
     export const getCompanyJobApplicants =async (req, res) => {
-
+       try {
+        const companyId =req.company._id
+        //Find job Applications for the user and populate relatd data
+        const applications =await JobApplication.find({companyId})
+        .populate('userId','name image resume')
+        .populate('jobId','title location category level salary')
+        .exec()
+        return res.json({success:true,applications})
+       } catch (error) {
+        res.json({success:false,message:error.message})
+       }
     }
 //Get Company Posted Jobs
 export const getCompanyPostedJobs =async (req, res) => {

@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const Applications = () => {
+   const { userApplications } = useContext(AppContext);
   const { user } = useUser();
   const { getToken } = useAuth();
   const [isEdit, setIsEdit] = useState(false);
@@ -113,15 +114,15 @@ const Applications = () => {
             </tr>
           </thead>
           <tbody>
-            {jobsApplied.map((job, index) => (
+            {userApplications.map((job, index) => (
               <tr key={job._id || index}>
                 <td className="py-3 px-4 flex items-center gap-2 border-b">
-                  <img className="w-8 h-8" src={job.logo} alt="" />
-                  {job.company}
+                  <img className="w-8 h-8" src={job.companyId.image} alt="" />
+                  {job.companyId.name}
                 </td>
-                <td className="py-2 px-4 border-b">{job.title}</td>
+                <td className="py-2 px-4 border-b">{job.jobId.title}</td>
                 {/* Correct order: Location then Date */}
-                <td className="py-2 px-4 border-b mx-sm:hidden">{job.location}</td>
+                <td className="py-2 px-4 border-b mx-sm:hidden">{job.jobId.location}</td>
                 <td className="py-2 px-4 border-b mx-sm:hidden">
                   {job.date ? moment(job.date).format('ll') : '—'}
                 </td>

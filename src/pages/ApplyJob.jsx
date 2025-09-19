@@ -132,10 +132,20 @@ import { useAuth } from "@clerk/clerk-react";
 
 function ApplyJob() {
   const { id } = useParams();
-  const { getToken } = useAuth()           // ✅ correct name
-  const navigate =useNavigate ()
+  const { getToken } = useAuth();
+  const navigate = useNavigate();
+
   const [JobData, setJobData] = useState(null);
-  const { jobs, backendUrl, userData } = useContext(AppContext);
+  const [isAlreadyApplied, setIsAlreadyApplied] = useState(false);
+
+  // ⬇️ Use EXACT names from your context (no renames)
+  const {
+    jobs,
+    backendUrl,
+    userData,
+    userApplications,
+    fetchUserApllications, // keep this spelling as in your context
+  } = useContext(AppContext);
 
   // Load job details
   const fetchJob = async () => {
@@ -151,35 +161,65 @@ function ApplyJob() {
     }
   };
 
-  // ✅ Define handler in component scope (NOT inside fetchJob)
+  // Apply handler
   const applyHandler = async () => {
     try {
       if (!userData) {
         return toast.error("Login to Apply for jobs");
       }
       if (!userData.resume) {
-        navigate ('/applications')
+        navigate("/applications");
         return toast.error("Upload resume to apply");
       }
-      const token =await getToken()
-      const {data} =await axios.post(backendUrl+'/api/users/apply',
-        {jobId :JobData._id},
-        {headers:{Authorization:`Bearer ${token}`}}
-      )
-      if (data.success) {
-        toast.success(data.message)
-      }else{
-        toast.error(data.message)
+      if (isAlreadyApplied) {
+        return; // prevent double-submit
       }
-      
+
+      const token = await getToken();
+      const { data } = await axios.post(
+        `${backendUrl}/api/users/apply`,
+        { jobId: JobData._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        setIsAlreadyApplied(true);       // flip immediately
+        await fetchUserApllications();   // refresh applications list
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
       toast.error(error?.message || "Something went wrong");
     }
   };
 
+  // Check if already applied for this job
+  const checkAlreadyApplied = () => {
+    if (!JobData) return;
+    const targetId = String(JobData._id);
+    const hasApplied = (userApplications || []).some((item) => {
+      // item.jobId can be a string or a populated object
+      const jid =
+        item?.jobId && typeof item.jobId === "object"
+          ? String(item.jobId._id)
+          : String(item.jobId);
+      return jid === targetId;
+    });
+    setIsAlreadyApplied(hasApplied);
+  };
+
   useEffect(() => {
     fetchJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (JobData) {
+      checkAlreadyApplied();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JobData, userApplications]);
 
   return JobData ? (
     <>
@@ -220,9 +260,12 @@ function ApplyJob() {
             <div className="flex flex-col justify-center text-end text-sm max-md:mx-auto max-md:text-center">
               <button
                 onClick={applyHandler}
-                className="bg-blue-600 p-2.5 px-10 text-white rounded"
+                disabled={isAlreadyApplied}
+                className={`p-2.5 px-10 rounded text-white ${
+                  isAlreadyApplied ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+                }`}
               >
-                Apply Now
+                {isAlreadyApplied ? "Already Applied" : "Apply Now"}
               </button>
               <p className="mt-1 text-gray-600">
                 Posted {moment(JobData.date).fromNow()}
@@ -240,9 +283,12 @@ function ApplyJob() {
               />
               <button
                 onClick={applyHandler}
-                className="bg-blue-600 p-2.5 px-10 text-white rounded mt-10"
+                disabled={isAlreadyApplied}
+                className={`mt-10 p-2.5 px-10 rounded text-white ${
+                  isAlreadyApplied ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+                }`}
               >
-                Apply Now
+                {isAlreadyApplied ? "Already Applied" : "Apply Now"}
               </button>
             </div>
 
