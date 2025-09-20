@@ -237,7 +237,7 @@ import { clerkClient } from "@clerk/express";
 // GET /api/users/user
 export const getUserData = async (req, res) => {
   try {
-    const clerkId = req.auth?.userId;
+    const clerkId = req.auth()?.userId;
     if (!clerkId) {
       return res.status(401).json({ success: false, message: "Unauthenticated" });
     }
@@ -276,7 +276,7 @@ export const getUserData = async (req, res) => {
 // POST /api/users/apply
 export const applyForJob = async (req, res) => {
   try {
-    const clerkId = req.auth?.userId;
+    const clerkId = req.auth()?.userId;
     const { jobId } = req.body;
 
     if (!clerkId || !jobId) {
@@ -310,7 +310,7 @@ export const applyForJob = async (req, res) => {
 // GET /api/users/applications
 export const getUserJobApplications = async (req, res) => {
   try {
-    const clerkId = req.auth?.userId;
+    const clerkId = req.auth()?.userId;
     const user = await User.findOne({ clerkId });
     if (!user) return res.json({ success: false, message: "User not found" });
 
@@ -331,7 +331,7 @@ export const getUserJobApplications = async (req, res) => {
 // POST /api/users/update-resume
 export const updateUserResume = async (req, res) => {
   try {
-    const clerkId = req.auth.userId;
+    const clerkId = req.auth().userId;
     const user = await User.findOne({ clerkId });
     if (!user) return res.json({ success: false, message: "User not found" });
 

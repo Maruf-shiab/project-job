@@ -62,7 +62,7 @@ const ManageJobs = () => {
 
   return jobs ? jobs.length ===0 ?(
   <div className='flex items-center justify-center h-[70vh]'>
-    <P className ='text-xl sm:text-2xl'>No Jobs Available or posted</P>
+    <p className ='text-xl sm:text-2xl'>No Jobs Available or posted</p>
   </div>
 ):(
     <div className='container p-4 max-w-5xl'>

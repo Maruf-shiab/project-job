@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import Home from './pages/Home.jsx'
+import LandingPage from './pages/LandingPage.jsx'
 import ApplyJob from './pages/ApplyJob.jsx'
 import Applications from './pages/Applications.jsx'
 import 'quill/dist/quill.snow.css'
@@ -22,14 +23,15 @@ const App = () => {
       {showRecruiterLogin && <RecruiterLogin />}
       <ToastContainer />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/apply-job/:id" element={<ApplyJob />} />
         <Route path="/applications" element={<Applications />} />
         <Route path='/dashboard' element={<Dashboard />}>
           {/* default child route when visiting /dashboard */}
 
           {companyToken ? <>
-            <Route index element={<Navigate to="add-job" replace />} />
+            <Route index element={<Navigate to="manage-jobs" replace />} />
             <Route path='add-job' element={<AddJob />} />
             <Route path='manage-jobs' element={<ManageJobs />} />
             <Route path='view-applications' element={<ViewApplications />} />
