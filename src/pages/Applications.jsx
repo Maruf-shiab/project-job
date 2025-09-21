@@ -1,22 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
-import { assets, jobsApplied } from '../assets/assets';
+import { assets } from '../assets/assets';
 import moment from 'moment';
 import Footer from '../components/Footer';
 import { AppContext } from '../context/AppContext';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Applications = () => {
-  // read from context
   const { userApplications } = useContext(AppContext);
-  const { backendUrl, userData, fetchUserData, fetchUserApllications } = useContext(AppContext);
+  const { backendUrl, userData, fetchUserData, fetchUserApllications } =
+    useContext(AppContext);
   const { user } = useUser();
   const { getToken } = useAuth();
 
   const [isEdit, setIsEdit] = useState(false);
   const [resume, setResume] = useState(null);
+  const navigate = useNavigate();
 
   const updateResume = async () => {
     try {
@@ -41,7 +43,9 @@ const Applications = () => {
         toast.error(data.message || 'Failed to update resume');
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message || 'Upload failed');
+      toast.error(
+        error?.response?.data?.message || error.message || 'Upload failed'
+      );
     } finally {
       setIsEdit(false);
       setResume(null);
@@ -52,18 +56,24 @@ const Applications = () => {
 
   useEffect(() => {
     if (user) {
-      // ✅ use the exact function name from your context
       fetchUserApllications();
     }
-  }, [user]); // keep minimal deps per your style
+  }, [user]);
 
-  // ✅ never crash if userApplications is undefined
   const list = Array.isArray(userApplications) ? userApplications : [];
 
   return (
     <>
       <Navbar />
       <div className="container px-4 min-h-[65vh] 2xl:px-20 mx-auto my-10">
+        {/* ✅ Back button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100 transition"
+        >
+          ← Back
+        </button>
+
         <h2 className="text-xl font-semibold">Your Resume</h2>
 
         <div className="flex gap-2 mb-6 mt-3">
@@ -120,16 +130,21 @@ const Applications = () => {
             <tr>
               <th className="px-4 py-3 border-b text-left">Company</th>
               <th className="px-4 py-3 border-b text-left">Job Title</th>
-              <th className="px-4 py-3 border-b text-left max-sm:hidden">Location</th>
-              <th className="px-4 py-3 border-b text-left max-sm:hidden">Date</th>
+              <th className="px-4 py-3 border-b text-left max-sm:hidden">
+                Location
+              </th>
+              <th className="px-4 py-3 border-b text-left max-sm:hidden">
+                Date
+              </th>
               <th className="px-4 py-3 border-b text-left">Status</th>
             </tr>
           </thead>
           <tbody>
             {list.map((job, index) => {
-              // ✅ handle both shapes: populated objects OR plain IDs
               const companyDoc =
-                job?.companyId && typeof job.companyId === 'object' ? job.companyId : null;
+                job?.companyId && typeof job.companyId === 'object'
+                  ? job.companyId
+                  : null;
               const jobDoc =
                 job?.jobId && typeof job.jobId === 'object' ? job.jobId : null;
 
@@ -143,11 +158,15 @@ const Applications = () => {
               return (
                 <tr key={job._id || index}>
                   <td className="py-3 px-4 flex items-center gap-2 border-b">
-                    {companyImage ? <img className="w-8 h-8" src={companyImage} alt="" /> : null}
+                    {companyImage ? (
+                      <img className="w-8 h-8" src={companyImage} alt="" />
+                    ) : null}
                     {companyName}
                   </td>
                   <td className="py-2 px-4 border-b">{title}</td>
-                  <td className="py-2 px-4 border-b max-sm:hidden">{location}</td>
+                  <td className="py-2 px-4 border-b max-sm:hidden">
+                    {location}
+                  </td>
                   <td className="py-2 px-4 border-b max-sm:hidden">
                     {appliedDate ? moment(appliedDate).format('ll') : '—'}
                   </td>

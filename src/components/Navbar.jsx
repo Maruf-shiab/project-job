@@ -8,7 +8,7 @@ const Navbar = () => {
     const navigate = useNavigate();
 
     return (
-        <div className='shadow py-4'>
+        <div className='sticky top-0 z-50 bg-gradient-to-br from-white via-pink-100 to-purple-500 shadow py-4'>
             <div className='container mx-auto flex justify-between items-center'>
                 <img 
                     onClick={() => navigate('/home')} 

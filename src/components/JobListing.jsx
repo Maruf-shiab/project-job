@@ -1,147 +1,208 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../context/AppContext';
-import { assets, JobCategories, JobLocations } from '../assets/assets';
-import JobCard from './JobCard';
+// src/components/JobListing.jsx
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { AppContext } from "../context/AppContext";
+import JobCard from "./JobCard";
+import { JobCategories, JobLocations } from "../assets/assets";
 
-const JobListing = () => {
-    const { isSearched, searchFilter, setSearchFilter, jobs } = useContext(AppContext);
+const PAGE_SIZE = 6;
 
-    const [showFilter, setShowFilter] = useState(false);
+/**
+ * Props (from Home.jsx):
+ *  - selectedCategories, setSelectedCategories
+ *  - selectedLocations,  setSelectedLocations
+ *  - showSideFilters (ignored here when filters live in the main sidebar)
+ */
+const JobListing = ({
+  selectedCategories,
+  setSelectedCategories,
+  selectedLocations,
+  setSelectedLocations,
+  showSideFilters = false, // filters are in the main app sidebar now
+}) => {
+  const { searchFilter, setSearchFilter, jobs } = useContext(AppContext);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedCategories, setSelectedCategories] = useState([])
-    const [selectedLocations, setSelectedLocations] = useState([])
+  // Fallback to internal state if props aren't provided (backwards-compat)
+  const [catsInternal, setCatsInternal] = useState([]);
+  const [locsInternal, setLocsInternal] = useState([]);
+  const cats = selectedCategories ?? catsInternal;
+  const setCats = setSelectedCategories ?? setCatsInternal;
+  const locs = selectedLocations ?? locsInternal;
+  const setLocs = setSelectedLocations ?? setLocsInternal;
 
-    const [filteredJobs, setFilteredJobs] = useState(jobs)
+  const [currentPage, setCurrentPage] = useState(1);
 
-    const handleCategoryChange = (category) => {
-        setSelectedCategories(
-            prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
-        );
-    };
+  // -------- Filtering (unchanged) --------
+  const norm = (s) => (s ?? "").toString().trim().toLowerCase();
 
+  const filteredJobs = useMemo(() => {
+    const titleQuery = norm(searchFilter?.title);
+    const locationQuery = norm(searchFilter?.location);
 
-        const handleLocationChange = (location) => {
-            setSelectedLocations(
-                prev => prev.includes(location) ? prev.filter(c => c !== location) : [...prev, location]
-            );
-        };
-        useEffect(()=>{
-            const matchesCategory=job=>selectedCategories.length===0|| selectedCategories.includes(job.category)
-            const matchesLocation= job=>selectedLocations.length===0||selectedLocations.includes(job.location)
-            const matchesTitle=job=>searchFilter.title===""||job.title.toLowerCase().includes(searchFilter.title.toLowerCase())
-            const matchesSearchLocation= job=>searchFilter.location==="" || job.location.toLowerCase().includes(searchFilter.location.toLowerCase())
-            const newFilteredJobs=jobs.slice().reverse().filter(
-                job => matchesCategory(job)&&matchesLocation(job)&&matchesTitle(job)&&matchesSearchLocation(job)
-            )
-            setFilteredJobs(newFilteredJobs)
-            setCurrentPage(1)
-        },[jobs,selectedCategories,selectedLocations,searchFilter])
-    
-    // Simple X icon as SVG
-    const CloseIcon = ({ onClick }) => (
-        <span
-            onClick={onClick}
-            className="ml-2 cursor-pointer text-lg font-bold text-gray-500 hover:text-gray-700 transition"
-            style={{ lineHeight: 1 }}
-            aria-label="Clear"
-        >
-            ×
-        </span>
-    );
+    const matchesCategory = (job) =>
+      cats.length === 0 || cats.some((c) => norm(c) === norm(job.category));
 
-    return (
-        <div className="container 2xl:px-20 mx-auto flex flex-col lg:flex-row max-lg:space-y-8 py-8">
-            <div className="w-full lg:w-1/4 bg-white px-4">
-                {isSearched && (searchFilter.title !== "" || searchFilter.location !== "") && (
-                    <>
-                        <h3 className="font-semibold text-xl mb-4">Current Search</h3>
-                        <div className="mb-4 flex gap-3 flex-wrap">
-                            {searchFilter.title && (
-                                <span className="inline-flex items-center bg-blue-50 border border-blue-200 text-blue-800 px-4 py-1 rounded-full shadow-sm font-medium text-base">
-                                    {searchFilter.title}
-                                    <CloseIcon onClick={() => setSearchFilter(prev => ({ ...prev, title: "" }))} />
-                                </span>
-                            )}
-                            {searchFilter.location && (
-                                <span className="ml-2 inline-flex items-center bg-red-50 border border-red-200 text-red-800 px-4 py-1 rounded-full shadow-sm font-medium text-base">
-                                    {searchFilter.location}
-                                    <CloseIcon onClick={() => setSearchFilter(prev => ({ ...prev, location: "" }))} />
-                                </span>
-                            )}
-                        </div>
-                    </>
-                )}
+    const matchesLocation = (job) =>
+      locs.length === 0 || locs.some((l) => norm(l) === norm(job.location));
 
-                <button onClick={e => setShowFilter(prev => !prev)} className='px-6 py-1.5 rounded border border-gray-400 lg:hidden'>
-                    {showFilter ? "Close" : "Filters"}
-                </button>
+    const matchesTitle = (job) =>
+      !titleQuery || norm(job.title).includes(titleQuery);
 
-                {/* Additional Category Filters */}
-                <div className={showFilter ? "" : "max-lg:hidden"}>
-                    <h4 className='font-medium text-lg py-4'>Search by Categories</h4>
-                    <ul className='space-y-4 text-gray-600'>
-                        {
-                            JobCategories.map((category, index) => (
-                                <li className='flex gap-3 items-center' key={index}>
-                                    <input className='scale-125' type="checkbox"
-                                        onChange={() => handleCategoryChange(category)}
-                                        checked={selectedCategories.includes(category)} />
-                                    {category}
+    const matchesSearchLocation = (job) =>
+      !locationQuery || norm(job.location).includes(locationQuery);
 
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </div>
+    return (jobs || [])
+      .slice()
+      .reverse()
+      .filter(
+        (job) =>
+          matchesCategory(job) &&
+          matchesLocation(job) &&
+          matchesTitle(job) &&
+          matchesSearchLocation(job)
+      );
+  }, [jobs, cats, locs, searchFilter]);
 
-                {/* Location Category Filters */}
-                <div className={showFilter ? "" : "max-lg:hidden"}>
-                    <h4 className='font-medium text-lg py-4 pt-14'>Search by Locations</h4>
-                    <ul className='space-y-4 text-gray-600'>
-                        {
-                            JobLocations.map((location, index) => (
-                                <li className='flex gap-3 items-center' key={index}>
-                                    <input className='scale-125' type="checkbox" onChange={() => handleLocationChange(location)}
-                                        checked={selectedLocations.includes(location)} />
-                                    {location}
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE));
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredJobs.slice(start, start + PAGE_SIZE);
+  }, [filteredJobs, currentPage]);
 
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </div>
+  useEffect(() => setCurrentPage(1), [cats, locs, searchFilter]);
+
+  // -------- Current search pills --------
+  const removeSearchPill = (key) => setSearchFilter({ ...searchFilter, [key]: "" });
+  const toggleCat = (c) =>
+    setCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  const toggleLoc = (l) =>
+    setLocs((prev) => (prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]));
+  const clearAll = () => {
+    setCats([]);
+    setLocs([]);
+    setSearchFilter({ title: "", location: "" });
+  };
+
+  const Pill = ({ children, onRemove }) => (
+    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-sm">
+      {children}
+      <button
+        onClick={onRemove}
+        className="rounded-full border border-gray-300 bg-gray-50 px-1.5 text-xs text-gray-600 hover:bg-gray-100"
+        aria-label="Remove filter"
+      >
+        ✕
+      </button>
+    </span>
+  );
+
+  const hasAnyFilter =
+    (searchFilter?.title || "").trim() !== "" ||
+    (searchFilter?.location || "").trim() !== "" ||
+    cats.length > 0 ||
+    locs.length > 0;
+
+  return (
+    <div className="mx-auto w-full max-w-[95rem] px-6 2xl:px-10 py-8">
+      {/* Sticky current search — aligned with the wider container */}
+      <div className="sticky top-5 z-30 mb-6">
+        <div className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur px-4 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm font-semibold text-gray-800">Current Search</div>
+
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+              {(searchFilter?.title || "").trim() !== "" && (
+                <Pill onRemove={() => removeSearchPill("title")}>{searchFilter.title}</Pill>
+              )}
+              {(searchFilter?.location || "").trim() !== "" && (
+                <Pill onRemove={() => removeSearchPill("location")}>{searchFilter.location}</Pill>
+              )}
+              {cats.map((c) => (
+                <Pill key={`c-${c}`} onRemove={() => toggleCat(c)}>
+                  {c}
+                </Pill>
+              ))}
+              {locs.map((l) => (
+                <Pill key={`l-${l}`} onRemove={() => toggleLoc(l)}>
+                  {l}
+                </Pill>
+              ))}
+              {!hasAnyFilter && <span className="text-sm text-gray-500">No filters applied</span>}
             </div>
-            {/*job listings section*/}
-            <section className="w-full lg:w-3/4 text-gray-800 max-lg:px-4 ">
-                <h3 className='font-medium text-3xl py-2 ' id='job-list'>Latest Jobs</h3>
-                <p className='mb-8'>Ready for a career glow-up? ✨</p>
-                <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
-                    {filteredJobs.slice((currentPage - 1) * 6, currentPage * 6).map((job, index) => (
-                        <JobCard key={index} job={job} />
-                    ))}
-                </div>
 
-                {/* Pagination */}
-                {filteredJobs.length > 0 && (
-                    <div className='flex items-center justify-center space-x-2 mt-10'>
-                        <a href="#job-list">
-                            <img onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))} src={assets.left_arrow_icon} alt="" />
-                        </a>
-                        {Array.from({ length: Math.ceil(filteredJobs.length / 6) }).map((_, index) => (
-                            <a href="#job-list" key={index}>
-                                <button onClick={() => setCurrentPage(index + 1)} className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded cursor-pointer ${currentPage === index + 1 ? 'bg-blue-100 text-blue-500' : 'text-gray-500'}`}>{index + 1}</button>
-                            </a>
-                        ))}
-                        <a href="#job-list">
-                            <img onClick={() => setCurrentPage(Math.min(currentPage + 1, Math.ceil(filteredJobs.length / 6)))} src={assets.right_arrow_icon} alt="" />
-                        </a>
-                    </div>
-                )}
-
-            </section>
+            {hasAnyFilter && (
+              <button
+                onClick={clearAll}
+                className="w-max rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Header + results count */}
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">Latest Jobs</h2>
+        </div>
+        <div className="text-sm text-gray-500">
+          {filteredJobs.length} result{filteredJobs.length !== 1 && "s"}
+        </div>
+      </div>
+
+      {/* Denser, wider grid — fully uses horizontal space on big screens */}
+      {paginated.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-500">
+          No jobs match your filters. Try clearing filters or changing your search.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {paginated.map((job, idx) => (
+            <JobCard key={`${job.id || job._id || job.title}-${idx}`} job={job} />
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav className="mt-8 flex items-center justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+            disabled={currentPage === 1}
+            aria-label="Previous page"
+          >
+            ‹
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+            <button
+              key={n}
+              onClick={() => setCurrentPage(n)}
+              className={`rounded-lg px-3 py-2 text-sm ${
+                n === currentPage
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+              aria-current={n === currentPage ? "page" : undefined}
+            >
+              {n}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+            disabled={currentPage === totalPages}
+            aria-label="Next page"
+          >
+            ›
+          </button>
+        </nav>
+      )}
+    </div>
+  );
 };
 
 export default JobListing;

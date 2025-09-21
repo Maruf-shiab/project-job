@@ -8,20 +8,16 @@ import { toast } from 'react-toastify'
 import Loading from '../components/Loading'
 
 const ManageJobs = () => {
-  
-  const navigate=useNavigate()
-
-  const [jobs,setJobs] = useState(false)
-
-  const {backendUrl, companyToken} = useContext(AppContext)
+  const navigate = useNavigate()
+  const [jobs, setJobs] = useState(false)
+  const { backendUrl, companyToken } = useContext(AppContext)
 
   // Function to fetch company job applications data
-
-  const fetchCompanyJobs = async () =>{
-
+  const fetchCompanyJobs = async () => {
     try {
-      const {data} = await axios.get(backendUrl+'/api/company/list-jobs',
-        {headers: {token:companyToken}}
+      const { data } = await axios.get(
+        backendUrl + '/api/company/list-jobs',
+        { headers: { token: companyToken } }
       )
 
       if (data.success) {
@@ -38,9 +34,10 @@ const ManageJobs = () => {
   // Function to change job visibility
   const changeJobVisibility = async (id) => {
     try {
-      const {data} = await axios.post(backendUrl+'/api/company/change-visiblity',
+      const { data } = await axios.post(
+        backendUrl + '/api/company/change-visiblity',
         { id },
-        {headers: {token: companyToken}}
+        { headers: { token: companyToken } }
       )
 
       if (data.success) {
@@ -54,55 +51,65 @@ const ManageJobs = () => {
     }
   }
 
-  useEffect(() =>{
+  useEffect(() => {
     if (companyToken) {
       fetchCompanyJobs()
     }
-  },[companyToken])
+  }, [companyToken])
 
-  return jobs ? jobs.length ===0 ?(
-  <div className='flex items-center justify-center h-[70vh]'>
-    <p className ='text-xl sm:text-2xl'>No Jobs Available or posted</p>
-  </div>
-):(
-    <div className='container p-4 max-w-5xl'>
-      <div className='overflow-x-auto'> 
-        <table className='min-w-full bg-white border border-gray-300 max-sm:text-sm'>
-          <thead>
-            <tr>
-              <th className='py-2 px-4 border-b text-left max-sm:hidden text-blue-950'>#</th>
-              <th className='py-2 px-4 border-b text-left text-blue-950'>Job Title</th>
-              <th className='py-2 px-4 border-b text-left max-sm:hidden text-blue-950'>Date</th>
-              <th className='py-2 px-4 border-b text-left max-sm:hidden text-blue-950' >Location</th>
-      
-              <th className='py-2 px-4 border-b text-center text-blue-950'>Applicants</th>
-              <th className='py-2 px-4 border-b text-left text-blue-950'>Visible</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((job,index)=>(
-              <tr key={index} className='text-gray-700'>
-                <td className='py-2 px-4 border-b max-sm:hidden'>{index+1}</td>
-                <td className='py-2 px-4 border-b'>{job.title}</td>
-                <td className='py-2 px-4 border-b max-sm:hidden'>{moment(job.date).format('ll')}</td>
-                <td className='py-2 px-4 border-b max-sm:hidden'>{job.location}</td>
-                <td className='py-2 px-4 border-b text-center'>{job.applicants}</td>
-                <td className='py-2 px-4 border-b'>
-                  <input onChange={()=>changeJobVisibility(job._id)} className='scale-125 ml-4' type="checkbox" checked={job.visible}/>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  return jobs ? (
+    jobs.length === 0 ? (
+      <div className='flex items-center justify-center h-[70vh]'>
+        <p className='text-xl sm:text-2xl'>No Jobs Available or posted</p>
       </div>
-     <div className="flex justify-end my-4">
-  <button onClick={()=>navigate('/dashboard/add-job')} className="bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-200">
-    Add New Job
-  </button>
-</div>
-
-    </div>
-  ):<Loading/>
+    ) : (
+      <div className='container p-4 max-w-5xl'>
+        <div className='overflow-x-auto'>
+          <table className='min-w-full bg-white border border-gray-300 max-sm:text-sm'>
+            <thead>
+              <tr>
+                <th className='py-2 px-4 border-b text-left max-sm:hidden text-blue-950'>#</th>
+                <th className='py-2 px-4 border-b text-left text-blue-950'>Job Title</th>
+                <th className='py-2 px-4 border-b text-left max-sm:hidden text-blue-950'>Date</th>
+                <th className='py-2 px-4 border-b text-left max-sm:hidden text-blue-950'>Location</th>
+                <th className='py-2 px-4 border-b text-center text-blue-950'>Applicants</th>
+                <th className='py-2 px-4 border-b text-left text-blue-950'>Visible</th>
+              </tr>
+            </thead>
+            <tbody>
+              {jobs.map((job, index) => (
+                <tr key={index} className='text-gray-700'>
+                  <td className='py-2 px-4 border-b max-sm:hidden'>{index + 1}</td>
+                  <td className='py-2 px-4 border-b'>{job.title}</td>
+                  <td className='py-2 px-4 border-b max-sm:hidden'>{moment(job.date).format('ll')}</td>
+                  <td className='py-2 px-4 border-b max-sm:hidden'>{job.location}</td>
+                  <td className='py-2 px-4 border-b text-center'>{job.applicants}</td>
+                  <td className='py-2 px-4 border-b'>
+                    <input
+                      onChange={() => changeJobVisibility(job._id)}
+                      className='scale-125 ml-4'
+                      type='checkbox'
+                      checked={job.visible}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className='flex justify-end my-4'>
+          <button
+            onClick={() => navigate('/dashboard/add-job')}
+            className='bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-200'
+          >
+            Add New Job
+          </button>
+        </div>
+      </div>
+    )
+  ) : (
+    <Loading />
+  )
 }
 
 export default ManageJobs
