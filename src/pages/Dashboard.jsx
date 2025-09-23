@@ -1,80 +1,135 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState, useRef } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 
 const Dashboard = () => {
+  const navigate = useNavigate()
+  const { companyData, setCompanyData, setCompanyToken } = useContext(AppContext)
+  const [showLogout, setShowLogout] = useState(false) // dropdown visibility
+  const dropdownRef = useRef(null)
 
-    const navigate = useNavigate()
+  const logout = () => {
+    setCompanyToken(null)
+    localStorage.removeItem('companyToken')
+    setCompanyData(null)
+    navigate('/')
+  }
 
-    const { companyData, setCompanyData, setCompanyToken } = useContext(AppContext)
-
-    // Function to logout for company
-    const logout = ()=>{
-        setCompanyToken(null)
-        localStorage.removeItem('companyToken')
-        setCompanyData(null)
-        navigate('/')
+  useEffect(() => {
+    if (companyData) {
+      navigate('/dashboard/manage-jobs')
     }
+  }, [companyData])
 
-    useEffect(()=>{
-        if (companyData) {
-            navigate('/dashboard/manage-jobs')
-        }
-    },[companyData])
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setShowLogout(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
-    return (
-        <div className='min-h-screen'>
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Navbar */}
+      <header className="shadow-md bg-gradient-to-br from-white via-blue-50 to-blue-200">
+        <div className="px-6 py-4 flex justify-between items-center">
+          <img
+            onClick={() => navigate('/')}
+            className="w-36 cursor-pointer"
+            src={assets.logo2}
+            alt="logo"
+          />
 
-            {/* Navbar for Recruiter Panel */}
-            <div className='shadow py-4'>
-                <div className='px-5 flex justify-between items-center'>
+          {companyData && (
+            <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+              <p className="max-sm:hidden font-medium text-gray-600">
+                Welcome, <span className="text-blue-600">{companyData.name}</span>
+              </p>
 
-                    <img onClick={e => navigate('/')} className='w-32 cursor-pointer' src={assets.logo2} alt="" />
-                    {companyData && (
-                        <div className='flex items-center gap-3'>
-                        <p className='max-sm:hidden'>Welcome!, {companyData.name}</p>
-                        <div className='relative group'>
-                            <img className='w-8 border rounded-full' src={companyData.image} alt="" />
-                            <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12'>
-                                <ul className='list-none m-0 p-2 bg-white rounded-md border text-sm'>
-                                    <li onClick={logout} className='py-1 px-2 cursor-pointer pr-10'>Logout</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    )}
-                    
+              {/* Profile with click-to-toggle dropdown */}
+              <img
+                className="w-10 h-10 border rounded-full object-cover cursor-pointer"
+                src={companyData.image}
+                alt="profile"
+                onClick={() => setShowLogout(prev => !prev)}
+              />
+
+              {showLogout && (
+                <div className="absolute top-12 right-0 z-50 w-36 bg-white border rounded-md shadow-lg">
+                  <ul className="list-none m-0 p-0">
+                    <li
+                      onClick={logout}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Logout
+                    </li>
+                  </ul>
                 </div>
+              )}
             </div>
-            <div className='flex items-start'>
-                {/*left sidebar with option to add job, manage jobs,view applications*/}
-                <div className='inline-block min-h-screen border-r-2'>
-                    <ul className="flex flex-col items-start pt-6 font-semibold text-blue-950">
-                        <NavLink className={({ isActive }) => ` flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${isActive && 'bg-blue-100 border-r-2 border-blue-500'}`} to={'add-job'}>
-                            <img className='min-w-4' src={assets.add_icon} alt="" />
-                            <p className="transition-transform duration-300 hover:-translate-y-1 max-sm:hidden">Add Job</p>
-
-                        </NavLink>
-                        <NavLink className={({ isActive }) => ` flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${isActive && 'bg-blue-100 border-r-2 border-blue-500'}`} to={'manage-jobs'}>
-                            <img className='min-w-4' src={assets.home_icon} alt="" />
-                            <p className="transition-transform duration-300 hover:-translate-y-1 max-sm:hidden">Manage Jobs</p>
-
-                        </NavLink>
-                        <NavLink className={({ isActive }) => ` flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${isActive && 'bg-blue-100 border-r-2 border-blue-500'}`} to={'view-applications'}>
-                            <img className='min-w-4' src={assets.person_tick_icon} alt="" />
-                            <p className="transition-transform duration-300 hover:-translate-y-1 max-sm:hidden">View Applications</p>
-
-                        </NavLink>
-                    </ul>
-                </div>
-                <div>
-                    <Outlet />
-                </div>
-
-            </div>
+          )}
         </div>
-    )
+      </header>
+
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <aside className="w-60 bg-gradient-to-b from-white via-blue-200 to-blue-400 border-r border-gray-400 shadow-sm">
+          <ul className="flex flex-col pt-6 font-medium text-black">
+            <NavLink
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-6 py-3 hover:bg-purple-200 transition ${
+                  isActive ? 'bg-red-100 border-r-4 border-blue-500 text-blue-600' : ''
+                }`
+              }
+              to="add-job"
+            >
+              <img className="w-5" src={assets.add_icon} alt="add" />
+              <span>Add Job</span>
+            </NavLink>
+
+            <NavLink
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-6 py-3 hover:bg-purple-200 transition ${
+                  isActive ? 'bg-red-100 border-r-4 border-blue-500 text-blue-600' : ''
+                }`
+              }
+              to="manage-jobs"
+            >
+              <img className="w-5" src={assets.home_icon} alt="manage" />
+              <span>Manage Jobs</span>
+            </NavLink>
+
+            <NavLink
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-6 py-3 hover:bg-purple-200 transition ${
+                  isActive ? 'bg-red-100 border-r-4 border-blue-500 text-blue-600' : ''
+                }`
+              }
+              to="view-applications"
+            >
+              <img className="w-5" src={assets.person_tick_icon} alt="applications" />
+              <span>View Applications</span>
+            </NavLink>
+          </ul>
+        </aside>
+
+        {/* Page Content */}
+        <main className="flex-1 p-6 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-200">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
 }
 
 export default Dashboard
